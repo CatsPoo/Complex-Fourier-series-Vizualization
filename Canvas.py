@@ -14,6 +14,7 @@ class Canvas:
         self.vectors_count = 100
         self.timeout = 10
 
+        self.loop_id = None
         self.root.title("Single Draw Paint Canvas")
 
         self.elements_to_delete_ids = []
@@ -74,10 +75,14 @@ class Canvas:
 
     def reset_canvas(self):
         """Clear the canvas and reset the drawing permission."""
+        if(self.loop_id):
+            self.root.after_cancel(self.loop_id)
+            self.loop_id = None
         self.canvas.delete("all")  # Clear canvas
         self.points = []  # Clear points list
         self.drawing_allowed = True  # Enable drawing again
         self.mouse_enabled = True
+        self.draw_axes()
         print("Canvas reset. You can draw again.")
 
     def draw_vectors(self):
@@ -104,7 +109,7 @@ class Canvas:
             x1, y1 = x2, y2
         self.canvas.create_oval(x2,y2, x2+self.points_size, y2+self.points_size, fill="blue", outline="blue")
         t+= delta_t
-        self.root.after(self.timeout, lambda: self.animate_vectors(vc,delta_t,t))
+        self.loop_id = self.root.after(self.timeout, lambda: self.animate_vectors(vc,delta_t,t))
 
             
 
