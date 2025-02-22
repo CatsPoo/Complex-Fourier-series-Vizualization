@@ -59,20 +59,5 @@ class PaintVisualizationCanvas(Canvas):
         vectors_indexes = vc.get_vectors_indexes()
         vc.set_C_Indexes(cfa.calculate_vectors_coefficient(vectors_indexes))
 
-        
+        self.animate_vectors(vc,0)
 
-        self.animate_vectors(vc,self.delta_t,0)
-
-
-    def animate_vectors(self,vc,delta_t,t):
-        for element in self.elements_to_delete_ids:
-            self.canvas.delete(element)
-
-        v = vc.get_vectors_at_t_for_canvas(t)
-        v=sorted(v, key=lambda x: x[0])[::-1]
-        
-        tip_x,tip_y=self.draw_vectors_chain((self.wisth//2,self.height//2),v)
-
-        self.canvas.create_oval(tip_x - self.points_size//2,tip_y - self.points_size//2, tip_x+self.points_size//2, tip_y+self.points_size//2, fill="blue", outline="blue")
-        t+= delta_t
-        self.loop_id = self.root.after(self.timeout, lambda: self.animate_vectors(vc,delta_t,t))

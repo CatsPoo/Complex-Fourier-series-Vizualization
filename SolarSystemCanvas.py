@@ -1,4 +1,5 @@
 from Canvas import Canvas
+from Vectors_Calculation import Vector_Calculation
 
 class SolarSystemCanvas(Canvas):
     def __init__(self, root, points_color='black', points_size=4):
@@ -23,5 +24,18 @@ class SolarSystemCanvas(Canvas):
         self.canvas.create_oval(x-center_star_size//2, y-center_star_size//2, x+center_star_size//2, y+center_star_size//2, fill=self.points_color, outline=self.points_color)  # Small dot
         self.points.append((x, y))  # Store point location
 
-    def animate_vectors(self, vc, delta_t, t):
-        pass
+    def draw_vectors(self):
+        cords = self.points_to_cords(self.points)
+        stars_speed = [1,-1]
+        C = {}
+        for i in range(1,len(cords)):
+            vector = (cords[i][0] - cords[i-1][1],cords[i][0] - cords[i-1][1])
+            C[stars_speed[i-1]] = complex(vector[0],vector[1]) 
+        
+        vc = Vector_Calculation(self.vectors_count)
+        vc.set_C_Indexes(C)
+        self.animate_vectors(vc,0)
+
+
+    def animate_vectors(self, vc, t):
+        return super().animate_vectors(vc,t)
