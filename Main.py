@@ -1,9 +1,9 @@
 import tkinter as tk
-from Canvas import Canvas
+from MainMenu import MainMenu
 
 def main():
     root = tk.Tk()
-    app = Canvas(root)
+    app = MainMenu(root)
     root.mainloop()
 
 if(__name__ == '__main__'):
