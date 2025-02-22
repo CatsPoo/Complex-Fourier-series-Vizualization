@@ -1,5 +1,6 @@
 import tkinter as tk
 from PaintVisualizationCanvas import PaintVisualizationCanvas
+from SolarSystemCanvas import SolarSystemCanvas
 class MainMenu:
     def __init__(self, root):
         self.root = root
@@ -30,9 +31,8 @@ class MainMenu:
         """Launch the new drag & drop mode."""
         self.root.destroy()  # Close the menu
         root = tk.Tk()
-        # from reverse_mode import ReverseMode  # Import the reverse mode
-        # app = ReverseMode(root)
-        # root.mainloop()
+        app = SolarSystemCanvas(root)
+        root.mainloop()
 
 if __name__ == "__main__":
     root = tk.Tk()

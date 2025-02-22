@@ -11,6 +11,7 @@ class Canvas:
 
         self.time = 0
         self.timeout = 1
+        self.delta_t = 0.001
 
         self.loop_id = None
 
@@ -26,8 +27,9 @@ class Canvas:
         self.mouse_enabled = True
 
         # Bind mouse events
-        self.canvas.bind("<B1-Motion>", self.mouse_click)
-        self.canvas.bind("<ButtonRelease-1>", self.mouse_release)  # Stop drawing on mouse release
+        self.canvas.bind("<B1-Motion>", self.mouse_move)
+        self.canvas.bind("<ButtonRelease-1>", self.mouse_release)
+        self.canvas.bind("<Button-1>", self.mouse_click)  # Stop drawing on mouse release
 
         # Button to print points
         self.button_print = tk.Button(self.root, text="Print Points", command=self.print_points)
@@ -51,8 +53,16 @@ class Canvas:
         self.canvas.create_text(self.wisth - 20, self.height // 2 - 10, text="X", fill="black")
         self.canvas.create_text(self.wisth // 2 + 10, 10, text="Y", fill="black")
 
+    def draw_point(self,point):
+        if(not self.mouse_enabled): return
+        """Draw on the canvas and store point locations, only if allowed."""
+        if self.drawing_allowed:
+            x, y = point.x, point.y
+            self.canvas.create_oval(x-self.points_size//2, y-self.points_size//2, x+self.points_size//2, y+self.points_size//2, fill=self.points_color, outline=self.points_color)  # Small dot
+            self.points.append((x, y))  # Store point location
 
-
+    def mouse_move(self,event):
+        pass
     def mouse_click(self, event):
         pass
 
@@ -76,12 +86,39 @@ class Canvas:
         print("Canvas reset. You can draw again.")
 
     def draw_vectors(self):
-        self.mouse_enabled = False
-        vc = Vector_Calculation(self.vectors_count,self.points)
-        delta_t = vc.detta_t
-
-        self.animate_vectors(vc,delta_t,0)
+        pass
        
     def animate_vectors(self,vc,delta_t,t):
         pass
 
+    def _canvas_to_math_coords(self, point):
+        x,y = point
+        """Convert canvas coordinates to mathematical coordinates (0,0) centered."""
+        center_x, center_y = self.wisth // 2, self.height // 2
+        return x - center_x, center_y - y  # Adjust to center origin
+    
+    def _math_coords_to_canvas(self, math_point):
+        math_x,math_y = math_point
+        center_x, center_y = self.wisth // 2, self.height // 2
+        return int(center_x + math_x), int(center_y - math_y)  # Reverse the transformation
+    
+    def points_to_cords(self,points):
+        math_points = [self._canvas_to_math_coords(point) for point in points]
+        return self._normalize_points(math_points)
+    
+    def _normalize_points(self,points):
+        half_width = self.wisth / 2
+        half_height = self.height / 2
+        return [(x / half_width, y / half_height) for x, y in points]
+    
+    def _denormalize_points(self,normalized_points):
+        half_width = self.canvas_width / 2
+        half_height = self.canvas_height / 2
+        return [(x * half_width, y * half_height) for x, y in normalized_points]
+    
+
+    def cords_to_points(self,points):
+        denormlized_points = self._denormalize_points(points)
+        return [self._math_coords_to_canvas(point) for point in denormlized_points]
+    
+    

@@ -1,6 +1,7 @@
 from Canvas import Canvas
 import tkinter as tk
 from Vectors_Calculation import Vector_Calculation
+from ComplexFunction_Aproximation import ComplexFunctionApproximation
 import math
 
 class PaintVisualizationCanvas(Canvas):
@@ -10,13 +11,8 @@ class PaintVisualizationCanvas(Canvas):
         self.vectors_count = 100
         self.root.title("Single Draw Paint Canvas")
 
-    def mouse_click(self, event):
-        if(not self.mouse_enabled): return
-        """Draw on the canvas and store point locations, only if allowed."""
-        if self.drawing_allowed:
-            x, y = event.x, event.y
-            self.canvas.create_oval(x, y, x+self.points_size, y+self.points_size, fill=self.points_color, outline=self.points_color)  # Small dot
-            self.points.append((x, y))  # Store point location
+    def mouse_move(self, event):
+        self.draw_point(event)
 
     def mouse_release(self, event):
         if(not self.mouse_enabled): return
@@ -40,22 +36,43 @@ class PaintVisualizationCanvas(Canvas):
             self.points.append((x,y))
             self.canvas.create_oval(x, y, x+self.points_size, y+self.points_size, fill=self.points_color, outline=self.points_color)  # Red dots for visibility
     
-    
+
+    def draw_vectors_chain(self,start_point,vectors):
+        x1,y1 = start_point
+        x2,y2 = 0,0
+        for vector in vectors:
+            dx = vector[0] * math.cos(vector[1]) * 245
+            dy = vector[0] * math.sin(vector[1]) * 245
+            x2, y2 = x1 + dx, y1 - dy  # Calculate new endpoint
+            line_id =  self.canvas.create_line(x1, y1, x2,y2, arrow=tk.LAST, width=1, fill="red")
+            self.elements_to_delete_ids.append(line_id)
+            x1, y1 = x2, y2
+        return x2,y2
+
+    def draw_vectors(self):
+        self.mouse_enabled = False
+
+        cords_list = self.points_to_cords(self.points)
+        cfa = ComplexFunctionApproximation(cords_list)
+
+        vc = Vector_Calculation(self.vectors_count)
+        vectors_indexes = vc.get_vectors_indexes()
+        vc.set_C_Indexes(cfa.calculate_vectors_coefficient(vectors_indexes))
+
+        
+
+        self.animate_vectors(vc,self.delta_t,0)
+
+
     def animate_vectors(self,vc,delta_t,t):
         for element in self.elements_to_delete_ids:
             self.canvas.delete(element)
 
         v = vc.get_vectors_at_t_for_canvas(t)
         v=sorted(v, key=lambda x: x[0])[::-1]
-        x1,y1 = self.wisth//2, self.height//2
-        x2,y2 = 0,0
-        for vector in v:
-            dx = vector[0] * math.cos(vector[1]) * 240
-            dy = vector[0] * math.sin(vector[1]) * 240
-            x2, y2 = x1 + dx, y1 - dy  # Calculate new endpoint
-            line_id =  self.canvas.create_line(x1, y1, x2,y2, arrow=tk.LAST, width=1, fill="red")
-            self.elements_to_delete_ids.append(line_id)
-            x1, y1 = x2, y2
-        self.canvas.create_oval(x2,y2, x2+self.points_size, y2+self.points_size, fill="blue", outline="blue")
+        
+        tip_x,tip_y=self.draw_vectors_chain((self.wisth//2,self.height//2),v)
+
+        self.canvas.create_oval(tip_x - self.points_size//2,tip_y - self.points_size//2, tip_x+self.points_size//2, tip_y+self.points_size//2, fill="blue", outline="blue")
         t+= delta_t
         self.loop_id = self.root.after(self.timeout, lambda: self.animate_vectors(vc,delta_t,t))
