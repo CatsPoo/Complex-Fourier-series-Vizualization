@@ -10,12 +10,13 @@ class Canvas:
         self.height = 500
 
         self.time = 0
-        self.timeout = 1
-        self.delta_t = 0.001
+        self.timeout = 10
+        self.delta_t = 0.003
 
         self.loop_id = None
 
         self.elements_to_delete_ids = []
+        self.oval_elements_id = []
 
         # Canvas setup
         self.canvas = tk.Canvas(self.root, bg="white", width=self.wisth, height=self.height)
@@ -58,7 +59,8 @@ class Canvas:
         """Draw on the canvas and store point locations, only if allowed."""
         if self.drawing_allowed:
             x, y = point.x, point.y
-            self.canvas.create_oval(x-self.points_size//2, y-self.points_size//2, x+self.points_size//2, y+self.points_size//2, fill=self.points_color, outline=self.points_color)  # Small dot
+            id = self.canvas.create_oval(x-self.points_size//2, y-self.points_size//2, x+self.points_size//2, y+self.points_size//2, fill=self.points_color, outline=self.points_color)  # Small dot
+            self.oval_elements_id.append(id)
             self.points.append((x, y))  # Store point location
 
     def mouse_move(self,event):
@@ -127,9 +129,19 @@ class Canvas:
         half_height = self.canvas_height / 2
         return [(x * half_width, y * half_height) for x, y in normalized_points]
     
-
     def cords_to_points(self,points):
         denormlized_points = self._denormalize_points(points)
         return [self._math_coords_to_canvas(point) for point in denormlized_points]
     
+    def draw_vectors_chain(self,start_point,vectors,mul = 245):
+        x1,y1 = start_point
+        x2,y2 = 0,0
+        for vector in vectors:
+            dx = vector[0] * math.cos(vector[1]) * mul
+            dy = vector[0] * math.sin(vector[1]) * mul
+            x2, y2 = x1 + dx, y1 - dy  # Calculate new endpoint
+            line_id =  self.canvas.create_line(x1, y1, x2,y2, arrow=tk.LAST, width=1, fill="red")
+            self.elements_to_delete_ids.append(line_id)
+            x1, y1 = x2, y2
+        return x2,y2
     

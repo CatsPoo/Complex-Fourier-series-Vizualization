@@ -37,18 +37,6 @@ class PaintVisualizationCanvas(Canvas):
             self.canvas.create_oval(x, y, x+self.points_size, y+self.points_size, fill=self.points_color, outline=self.points_color)  # Red dots for visibility
     
 
-    def draw_vectors_chain(self,start_point,vectors):
-        x1,y1 = start_point
-        x2,y2 = 0,0
-        for vector in vectors:
-            dx = vector[0] * math.cos(vector[1]) * 245
-            dy = vector[0] * math.sin(vector[1]) * 245
-            x2, y2 = x1 + dx, y1 - dy  # Calculate new endpoint
-            line_id =  self.canvas.create_line(x1, y1, x2,y2, arrow=tk.LAST, width=1, fill="red")
-            self.elements_to_delete_ids.append(line_id)
-            x1, y1 = x2, y2
-        return x2,y2
-
     def draw_vectors(self):
         self.mouse_enabled = False
 
